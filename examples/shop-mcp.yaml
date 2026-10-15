@@ -1,0 +1,89 @@
+# mcpsmith curation file — the reviewed layer between your spec and your MCP server.
+# Example: the draft after a human review pass (see find_orders, the login auth, and excluded tools).
+# Review every TODO, then: mcpsmith build <spec> <this file> -o <dir>
+#
+# Rules of thumb:
+#   include only what an agent story needs ('As an agent, given X, I use Y to achieve Z')
+#   name = verb_noun, no versions; description = what it does, when to use it, when NOT to
+#   hide params the model should never set (pagination, versions, internal flags)
+
+server:
+  name: "Demo Shop API MCP"
+  base_url: "https://api.demo-shop.example"   # overridable at runtime with API_BASE_URL
+  timeout: 30
+
+auth:   # none | bearer | api_key | basic | login
+  type: login
+  login_url: /api/v1/auth/login
+  username_env: API_KEY
+  password_env: API_SECRET
+  token_path: responseBody.accessToken
+  expires_in_path: responseBody.expiresIn
+  # Key + secret exchanged for a short-lived token (common for payment APIs):
+  # type: login
+  # login_url: /api/v1/auth/login        # relative to base_url, or absolute
+  # username_env: API_KEY                # sent as HTTP Basic to the login endpoint
+  # password_env: API_SECRET
+  # token_path: responseBody.accessToken  # dotted path into the login JSON
+  # expires_in_path: responseBody.expiresIn
+
+tools:
+  # ── GET /v2/orders  [orders]
+  # ! very short description (14 chars) — say when to use it
+  # ! operationId 'list_orders_v2__get' is a poor tool name (version/__/symbols)
+  # ! cryptic param names: q, lim, fq — rename them
+  # ! 5 params have no description
+  list_orders_v2__get:
+    include: true
+    name: find_orders
+    description: "Find a customer's orders by email. Call this before refunding; use get_order when you already have an order ID."   # TODO: what it does, when to use it, when not to
+    args:
+      q: {rename: customer_email, description: "Customer email address"}   # TODO: give it a self-explaining name
+      lim: {hide: true, default: 20}   # pagination — the model rarely needs it
+      fq: {hide: true}   # TODO: give it a self-explaining name
+      page: {hide: true}   # pagination — the model rarely needs it
+
+  # ── GET /v2/orders/{order_id}  [orders]
+  # ! very short description (9 chars) — say when to use it
+  # ! operationId 'get_order_v2__get' is a poor tool name (version/__/symbols)
+  get_order_v2__get:
+    include: true
+    name: get_order
+    description: "Get order"   # TODO: what it does, when to use it, when not to
+
+  # ── GET /v2/orders/{order_id}/items  [orders]
+  # ! no summary or description — the model will have to guess from the name
+  get_order_items:
+    include: false
+    name: get_order_items
+    description: ""   # TODO: what it does, when to use it, when not to
+
+  # ── POST /v2/refunds  [refunds]
+  post_refunds:
+    include: true
+    name: create_refund
+    description: "Refund all or part of a paid order."
+
+  # ── GET /v2/refunds/{refund_id}  [refunds]
+  # ! very short description (17 chars) — say when to use it
+  get_refund_status:
+    include: true
+    name: get_refund_status
+    description: "Get refund status"   # TODO: what it does, when to use it, when not to
+
+  # ── DELETE /v2/customers/{customer_id}  [customers]
+  # ! destructive: DELETE — excluded by default
+  # ! very short description (15 chars) — say when to use it
+  delete_customer:
+    include: false
+    name: delete_customer
+    description: "Delete customer"
+
+  # ── POST /admin/search/reindex  [internal]
+  # ! looks internal/admin (path or tag) — excluded by default
+  # ! very short description (14 chars) — say when to use it
+  admin_reindex_search:
+    include: false
+    name: create_search_reindex
+    description: "Reindex search"
+

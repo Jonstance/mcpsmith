@@ -1,0 +1,51 @@
+{
+  "name": "mcpsmith",
+  "version": "0.1.0",
+  "description": "Turn an OpenAPI spec into a curated, shippable MCP server. Gemini curates, Cloud Run hosts, Gemini CLI connects.",
+  "type": "module",
+  "bin": {
+    "mcpsmith": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "runtime",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "prepare": "npm run build",
+    "test": "npm run build && node --test test/*.test.mjs",
+    "prepublishOnly": "npm test"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "openapi",
+    "gemini",
+    "cloud-run",
+    "agents",
+    "cli"
+  ],
+  "author": "Constance Etiosa",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jonstance/mcpsmith.git"
+  },
+  "homepage": "https://github.com/jonstance/mcpsmith#readme",
+  "dependencies": {
+    "@google/genai": "^2.29.1",
+    "@modelcontextprotocol/client": "^2.3.1",
+    "@modelcontextprotocol/node": "^2.1.1",
+    "@modelcontextprotocol/server": "^2.3.1",
+    "yaml": "^2.9.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "typescript": "^7.0.2"
+  }
+}

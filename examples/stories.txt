@@ -1,0 +1,3 @@
+# Agent stories for the demo shop API: one per line.
+As an agent, given a customer's email, I find their orders and refund one of them.
+As an agent, given a refund ID, I check whether the refund went through.

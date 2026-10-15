@@ -1,0 +1,106 @@
+openapi: 3.0.3
+info:
+  title: Demo Shop API
+  version: "2.0"
+  description: A small made-up shop API used to demo mcpsmith.
+servers:
+  - url: https://api.demo-shop.example
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    Order:
+      type: object
+      properties:
+        id: {type: string}
+        email: {type: string}
+        total: {type: number}
+        status: {type: string, enum: [paid, refunded, pending]}
+    RefundRequest:
+      type: object
+      required: [order_id]
+      properties:
+        order_id: {type: string}
+        amount: {type: number, description: Partial amount; omit for full refund}
+        reason: {type: string}
+security:
+  - bearerAuth: []
+paths:
+  /v2/orders:
+    get:
+      operationId: list_orders_v2__get
+      summary: List orders v2
+      tags: [orders]
+      parameters:
+        - {name: q, in: query, schema: {type: string}}
+        - {name: lim, in: query, schema: {type: integer, default: 20}}
+        - {name: fq, in: query, schema: {type: string}}
+        - {name: sort, in: query, schema: {type: string}}
+        - {name: page, in: query, schema: {type: integer}}
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: {type: array, items: {$ref: "#/components/schemas/Order"}}
+  /v2/orders/{order_id}:
+    get:
+      operationId: get_order_v2__get
+      summary: Get order
+      tags: [orders]
+      parameters:
+        - {name: order_id, in: path, required: true, schema: {type: string}}
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: {$ref: "#/components/schemas/Order"}
+  /v2/orders/{order_id}/items:
+    get:
+      operationId: get_order_items
+      tags: [orders]
+      parameters:
+        - {name: order_id, in: path, required: true, schema: {type: string}}
+      responses:
+        "200": {description: OK}
+  /v2/refunds:
+    post:
+      operationId: post_refunds
+      summary: Create refund
+      description: Refund all or part of a paid order.
+      tags: [refunds]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: "#/components/schemas/RefundRequest"}
+      responses:
+        "201": {description: Created}
+  /v2/refunds/{refund_id}:
+    get:
+      operationId: get_refund_status
+      summary: Get refund status
+      tags: [refunds]
+      parameters:
+        - {name: refund_id, in: path, required: true, schema: {type: string}}
+      responses:
+        "200": {description: OK}
+  /v2/customers/{customer_id}:
+    delete:
+      operationId: delete_customer
+      summary: Delete customer
+      tags: [customers]
+      parameters:
+        - {name: customer_id, in: path, required: true, schema: {type: string}}
+      responses:
+        "204": {description: Deleted}
+  /admin/search/reindex:
+    post:
+      operationId: admin_reindex_search
+      summary: Reindex search
+      tags: [internal]
+      responses:
+        "202": {description: Accepted}
